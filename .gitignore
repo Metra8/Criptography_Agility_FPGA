@@ -1,0 +1,8 @@
+# Archivos generados por herramientas VHDL/FPGA
+*.cf
+*.o
+*.ghw
+*.vcd
+*.log
+*.bit
+*.hwh
