@@ -11,7 +11,6 @@ entity key_expansion is
         reset       : in std_logic;
         key         : in std_logic_vector(127 downto 0);
         round_keys  : out key_array_t
-
     );
 
 end key_expansion;
