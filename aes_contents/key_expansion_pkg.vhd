@@ -54,6 +54,7 @@ package body key_expansion_pkg is
         --expansión de claves
         for i in 4 to 43 loop
             temp := w(i-1);
+            --cada 4 iteraciones aplicamos una transformación especial
             if (i mod 4 = 0) then
                 rcon_byte := Rcon (8*((i/4)-1)+7 downto 8*((i/4)-1));
                 temp := SubWord(RotWord(temp)) xor (rcon_byte & x"00000000");
