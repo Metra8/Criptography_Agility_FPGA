@@ -1,6 +1,9 @@
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.all;
 USE IEEE.numeric_std.all;
+USE work.sbox_pkg.all;
+USE work.key_expansion_pkg.all;
+USE work.aes_transform_pkg.all;
 
 entity aes_128 is
 
@@ -22,7 +25,7 @@ end aes_128;
 
 architecture behavioral of aes_128 is
 
-    type round_key_array is array (0 to 10) of std_logic_vector(127 downto 0);
+
 
     --hacemos una máquina de estados
     type state_type is (
@@ -42,7 +45,7 @@ architecture behavioral of aes_128 is
     --registros internos
     signal round_key        : std_logic_vector(127 downto 0);
     signal state_reg        : std_logic_vector(127 downto 0);
-    signal round_keys       : round_key_array;
+    signal round_keys       : key_array_t;
     signal round_counter    : integer range 0 to 10 := 0;
 
     --búferes
@@ -71,6 +74,7 @@ begin
                 
                 when KEY_EXPAND =>
                     --lógica expansión de clave
+                    round_keys <= key_expansion(key);
                     state <= INIT_ROUND;
                 
                 when INIT_ROUND =>
@@ -82,18 +86,19 @@ begin
                     --lógica subbytes usando sbox externa
                     for i in 0 to 15 loop
                         --pasar 8 bits (un Byte) por iteración a la sbox
-                        sbox_addr <= state_reg(8*i+7 downto 8*i);
-                        subbytes_out(8*i+7 downto 8*i) <= sbox_data;
-                        --cada vez que cambiemos sbox_addr tiene que cambiar sbox_data
+                        subbytes_out <= sbox(state_reg(8*i+7 downto 8*i));
                     end loop;
                     state <= SHIFT_ROWS;
 
                 when SHIFT_ROWS =>
                     --lógica shift_rows
+                    shiftrows_out <= ShiftRows(subbytes_out);
+
                     state <= MIX_COLUMNS;
                 
                 when MIX_COLUMNS =>
                     --lógica mix_columns
+                    mixcolumns_out <= MixColumns(shiftrows_out);
                     state <= ADD_ROUND_KEY;
 
                 when ADD_ROUND_KEY =>
@@ -108,6 +113,18 @@ begin
 
                 when FINAL_ROUND =>
                     --lo mismo pero sin mixcolumns
+                    --subbytes
+                    for i in 0 to 15 loop
+                        --pasar 8 bits (un Byte) por iteración a la sbox
+                        subbytes_out <= sbox(state_reg(8*i+7 downto 8*i));
+                    end loop;
+                    --shift rows
+                    shiftrows_out <= ShiftRows(subbytes_out);
+                    --sin mix columns
+                    --add round key
+                    state_reg <= mixcolumns_out xor round_keys (round_counter);
+                    round_counter <= round_counter + 1;
+
                     state <= DONE;
 
                 when DONE =>
@@ -121,8 +138,6 @@ begin
         end if;
     end process;
 
-
---implementar aquí módulos funcionales
 
 
 
