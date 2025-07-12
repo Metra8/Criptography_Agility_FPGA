@@ -14,8 +14,6 @@ entity aes_128 is
         key         : in std_logic_vector(127 downto 0);
         data_in     : in std_logic_vector(127 downto 0);
         --entradas y salidas del sbox respectivamente
-        sbox_addr   : out std_logic_vector(7 downto 0);
-        sbox_data   : in std_logic_vector(7 downto 0);
         data_out    : out std_logic_vector(127 downto 0);
         ready       : out std_logic
     );
