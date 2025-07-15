@@ -57,7 +57,7 @@ package body key_expansion_pkg is
             --cada 4 iteraciones aplicamos una transformación especial
             if (i mod 4 = 0) then
                 rcon_byte := Rcon (8*((i/4)-1)+7 downto 8*((i/4)-1));
-                temp := SubWord(RotWord(temp)) xor (rcon_byte & x"00000000");
+                temp := SubWord(RotWord(temp)) xor (rcon_byte & x"000000");
             end if;
             w(i) := w(i-4) xor temp;
         end loop;

@@ -61,7 +61,18 @@ begin
             state_reg <= (others => '0');
             round_counter <= 0;
             ready <= '0';
+            data_out <= (others => '0');
+            subbytes_out <= (others => '0');
+            shiftrows_out <= (others => '0');
+            mixcolumns_out <= (others => '0');
+
+            for i in 0 to 10 loop
+                round_keys(i) <= (others => '0');
+            end loop;
+
+                
         elsif rising_edge(clk) then
+            round_key <= (others => '0'); -- Asignación por defecto
             case state is
                 when IDLE =>
                     if enable = '1' then
@@ -84,7 +95,7 @@ begin
                     --lógica subbytes usando sbox externa
                     for i in 0 to 15 loop
                         --pasar 8 bits (un Byte) por iteración a la sbox
-                        subbytes_out <= sbox(state_reg(8*i+7 downto 8*i));
+                        subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
                     end loop;
                     state <= SHIFT_ROWS;
 
@@ -114,7 +125,7 @@ begin
                     --subbytes
                     for i in 0 to 15 loop
                         --pasar 8 bits (un Byte) por iteración a la sbox
-                        subbytes_out <= sbox(state_reg(8*i+7 downto 8*i));
+                        subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
                     end loop;
                     --shift rows
                     shiftrows_out <= ShiftRows(subbytes_out);
