@@ -69,14 +69,14 @@ begin
         );
 
 
-    process(clk, reset)
+    process
     begin
-        if rising_edge(clk) then
+        while true loop
             clk <= '0';
             wait for clk_semiperiod;
             clk <= '1';
-            wait for clk_semiperiod; 
-        end if;
+            wait for clk_semiperiod;
+        end loop; 
     end process;
 
     process

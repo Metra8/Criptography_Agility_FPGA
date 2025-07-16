@@ -72,78 +72,80 @@ begin
 
                 
         elsif rising_edge(clk) then
-            round_key <= (others => '0'); -- Asignación por defecto
-            case state is
-                when IDLE =>
-                    if enable = '1' then
-                        state_reg <= data_in;
-                        round_counter <= 0;
-                        state <= KEY_EXPAND;
-                    end if;
-                
-                when KEY_EXPAND =>
-                    --lógica expansión de clave
-                    round_keys <= key_expansion(key);
-                    state <= INIT_ROUND;
-                
-                when INIT_ROUND =>
-                    state_reg <= state_reg xor round_keys(0);
-                    round_counter <= 1;
-                    state <= SUB_BYTES;
-
-                when SUB_BYTES =>
-                    --lógica subbytes usando sbox externa
-                    for i in 0 to 15 loop
-                        --pasar 8 bits (un Byte) por iteración a la sbox
-                        subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
-                    end loop;
-                    state <= SHIFT_ROWS;
-
-                when SHIFT_ROWS =>
-                    --lógica shift_rows
-                    shiftrows_out <= ShiftRows(subbytes_out);
-
-                    state <= MIX_COLUMNS;
-                
-                when MIX_COLUMNS =>
-                    --lógica mix_columns
-                    mixcolumns_out <= MixColumns(shiftrows_out);
-                    state <= ADD_ROUND_KEY;
-
-                when ADD_ROUND_KEY =>
-                    state_reg <= mixcolumns_out xor round_keys (round_counter);
-                    round_counter <= round_counter + 1;
-
-                    if round_counter = 10 then
-                        state <= FINAL_ROUND;
-                    else
+            if enable = 1 then
+                round_key <= (others => '0'); -- Asignación por defecto
+                case state is
+                    when IDLE =>
+                        if enable = '1' then
+                            state_reg <= data_in;
+                            round_counter <= 0;
+                            state <= KEY_EXPAND;
+                        end if;
+                    
+                    when KEY_EXPAND =>
+                        --lógica expansión de clave
+                        round_keys <= key_expansion(key);
+                        state <= INIT_ROUND;
+                    
+                    when INIT_ROUND =>
+                        state_reg <= state_reg xor round_keys(0);
+                        round_counter <= 1;
                         state <= SUB_BYTES;
-                    end if;
 
-                when FINAL_ROUND =>
-                    --lo mismo pero sin mixcolumns
-                    --subbytes
-                    for i in 0 to 15 loop
-                        --pasar 8 bits (un Byte) por iteración a la sbox
-                        subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
-                    end loop;
-                    --shift rows
-                    shiftrows_out <= ShiftRows(subbytes_out);
-                    --sin mix columns
-                    --add round key
-                    state_reg <= mixcolumns_out xor round_keys (round_counter);
-                    round_counter <= round_counter + 1;
+                    when SUB_BYTES =>
+                        --lógica subbytes usando sbox externa
+                        for i in 0 to 15 loop
+                            --pasar 8 bits (un Byte) por iteración a la sbox
+                            subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
+                        end loop;
+                        state <= SHIFT_ROWS;
 
-                    state <= DONE;
+                    when SHIFT_ROWS =>
+                        --lógica shift_rows
+                        shiftrows_out <= ShiftRows(subbytes_out);
 
-                when DONE =>
-                    data_out <= state_reg;
-                    ready <= '1';
-                    state <= IDLE;
-                
-                when others =>
-                    state <= IDLE;
-            end case;
+                        state <= MIX_COLUMNS;
+                        
+                    when MIX_COLUMNS =>
+                        --lógica mix_columns
+                        mixcolumns_out <= MixColumns(shiftrows_out);
+                        state <= ADD_ROUND_KEY;
+
+                    when ADD_ROUND_KEY =>
+                        state_reg <= mixcolumns_out xor round_keys (round_counter);
+                        round_counter <= round_counter + 1;
+
+                        if round_counter = 10 then
+                            state <= FINAL_ROUND;
+                        else
+                            state <= SUB_BYTES;
+                        end if;
+
+                    when FINAL_ROUND =>
+                        --lo mismo pero sin mixcolumns
+                        --subbytes
+                        for i in 0 to 15 loop
+                            --pasar 8 bits (un Byte) por iteración a la sbox
+                            subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
+                        end loop;
+                        --shift rows
+                        shiftrows_out <= ShiftRows(subbytes_out);
+                        --sin mix columns
+                        --add round key
+                        state_reg <= mixcolumns_out xor round_keys (round_counter);
+                        round_counter <= round_counter + 1;
+
+                        state <= DONE;
+
+                    when DONE =>
+                        data_out <= state_reg;
+                        ready <= '1';
+                        state <= IDLE;
+                        
+                    when others =>
+                        state <= IDLE;
+                end case;
+            end if;
         end if;
     end process;
 
