@@ -90,8 +90,6 @@ begin
         data_in <= x"3243f6a8885a308d313198a2e0370734";
 
         enable <= '1';
-        wait for 10 ns;
-        enable <= '0';
 
         wait until ready = '1';
 

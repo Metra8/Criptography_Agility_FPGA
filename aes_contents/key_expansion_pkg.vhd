@@ -45,6 +45,7 @@ package body key_expansion_pkg is
         variable rk         : key_array_t;
         variable temp       : std_logic_vector(31 downto 0);
         variable rcon_byte  : std_logic_vector(7 downto 0);
+        variable rcon_index : integer;
     begin
         --asignar la clave a el word array
         for i in 0 to 3 loop

@@ -41,10 +41,9 @@ architecture behavioral of aes_128 is
     signal state : state_type := IDLE;
 
     --registros internos
-    signal round_key        : std_logic_vector(127 downto 0);
     signal state_reg        : std_logic_vector(127 downto 0);
     signal round_keys       : key_array_t;
-    signal round_counter    : integer range 0 to 10 := 0;
+    signal round_counter    : integer range 0 to 11 := 0;
 
     --búferes
     signal subbytes_out     : std_logic_vector(127 downto 0);
@@ -55,6 +54,8 @@ architecture behavioral of aes_128 is
 begin
 
     process(clk, reset)
+        variable tmp  : std_logic_vector(127 downto 0);
+        variable byte : std_logic_vector(7 downto 0);
     begin
         if reset = '1' then
             state <= IDLE;
@@ -72,15 +73,12 @@ begin
 
                 
         elsif rising_edge(clk) then
-            if enable = 1 then
-                round_key <= (others => '0'); -- Asignación por defecto
+            if enable = '1' then
                 case state is
                     when IDLE =>
-                        if enable = '1' then
-                            state_reg <= data_in;
-                            round_counter <= 0;
-                            state <= KEY_EXPAND;
-                        end if;
+                        state_reg <= data_in;
+                        round_counter <= 0;
+                        state <= KEY_EXPAND;
                     
                     when KEY_EXPAND =>
                         --lógica expansión de clave
@@ -122,20 +120,18 @@ begin
                         end if;
 
                     when FINAL_ROUND =>
-                        --lo mismo pero sin mixcolumns
-                        --subbytes
+                        -- 1) SubBytes → tmp
                         for i in 0 to 15 loop
-                            --pasar 8 bits (un Byte) por iteración a la sbox
-                            subbytes_out(8*i+7 downto 8*i) <= sbox(state_reg(8*i+7 downto 8*i));
+                            byte := state_reg(8*i+7 downto 8*i);
+                            tmp(8*i+7 downto 8*i) := sbox(byte);
                         end loop;
-                        --shift rows
-                        shiftrows_out <= ShiftRows(subbytes_out);
-                        --sin mix columns
-                        --add round key
-                        state_reg <= mixcolumns_out xor round_keys (round_counter);
-                        round_counter <= round_counter + 1;
-
-                        state <= DONE;
+                        -- 2) ShiftRows y AddRoundKey en tmp
+                        tmp := ShiftRows(tmp) xor round_keys(10);
+                        -- 3) Salida y ready
+                        state_reg <= tmp;
+                        data_out  <= tmp;
+                        ready     <= '1';
+                        state     <= DONE;
 
                     when DONE =>
                         data_out <= state_reg;
