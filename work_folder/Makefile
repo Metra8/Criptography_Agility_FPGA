@@ -3,15 +3,17 @@ PACKAGES = \
     key_expansion_pkg.vhd \
     aes_transform_pkg.vhd
 
-TOP = aes_128
-TOP_VHD = aes_128.vhd
+SOURCES = \
+    $(PACKAGES) \
+    aes_128.vhd \
+    kyber_512.vhd \
+    crypto_wrapper.vhd
 
+TOP = crypto_wrapper
 
 all:
-	ghdl -a $(PACKAGES)
-	ghdl -a $(TOP_VHD)
+	ghdl -a $(SOURCES)
 	ghdl -e $(TOP)
-
 
 clean:
 	rm -f *.o *.cf $(TOP)
