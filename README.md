@@ -1,4 +1,4 @@
-================================================================================
+
 CRYPTO-AGILE HARDWARE CRYPTOGRAPHIC WRAPPER
 ================================================================================
 
@@ -9,7 +9,7 @@ This project presents a crypto-agile hardware architecture capable of dynamicall
 
 **Note**: Due to the significant complexity of implementing Kyber-512 in hardware—particularly its polynomial arithmetic, noise sampling, and reconciliation mechanisms—the current version includes **Kyber as a behavioral stub**. This stub emulates Kyber’s interface (ports, timing, and control signals) to support full system testing and integration with the crypto-agility FSM. This decision preserves the project’s architectural integrity while focusing development effort on the crypto-agility mechanism.
 
-================================================================================
+
 PROJECT FEATURES
 ----------------
 
@@ -24,7 +24,6 @@ PROJECT FEATURES
 • Fully synthesizable and reusable RTL design
 
 
-================================================================================
 CRITERIA COMPLIANCE
 -------------------
 
@@ -68,7 +67,7 @@ The project was designed to meet all evaluation criteria specified by the organi
    • Utility components such as the S-box and FSM control logic are cleanly abstracted for future integration.
    • The `crypto_wrapper` is designed to be easily extendable to support additional algorithms once implemented.
 
-================================================================================
+
 CONTACT & ATTRIBUTION
 ---------------------
 
