@@ -1,7 +1,8 @@
 PACKAGES = \
     sbox_pkg.vhd \
     key_expansion_pkg.vhd \
-    aes_transform_pkg.vhd
+    aes_transform_pkg.vhd \
+    to_hexadecimal_pkg.vhd
 
 SOURCES = \
     $(PACKAGES) \
