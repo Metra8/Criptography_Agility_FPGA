@@ -10,7 +10,7 @@
 --      - pk : public key (serialized).
 -- Outputs:
 --      - valid : indicates that the output data is valid.
---      - ct : cyphertext (serialized).
+--      - ct : ciphertext (serialized).
 --
 -- Generics:
 --      -SS_BITS: number of ss bits.

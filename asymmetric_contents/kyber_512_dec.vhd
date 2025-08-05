@@ -6,7 +6,7 @@
 -- Inputs:
 --      - clk: clock.
 --      - reset: async reset.
---      - ct: cyphertext.
+--      - ct: ciphertext.
 -- Outputs:
 --      - valid: indicates the output data is valid.
 --      - ss: source text (unencrypted).
