@@ -1,3 +1,20 @@
+-------------------------------------------------------------------------------
+-- Name: crypto_wrapper
+--
+-- Description: wrapper entity for switching easily between protocols.
+--
+-- Inputs:
+--      -clk: clock
+--      -reset: async reset
+--      -enable: enable signal
+--      -select_cipher: switch for selecting the appropriate cipher.
+--      -key: algorithm key.
+--      -data_in: data input signal.
+--
+-- Outputs:
+--      - data_out: data output signal.
+--      - ready: ready signal
+-------------------------------------------------------------------------------
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
