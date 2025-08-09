@@ -7,7 +7,9 @@ PACKAGES = \
 SOURCES = \
     $(PACKAGES) \
     aes_128.vhd \
-    kyber_512.vhd \
+    kyber_512_keypair.vhd \
+    kyber_512_dec.vhd \
+    kyber_512_enc.vhd \
     crypto_wrapper.vhd
 
 TOP = crypto_wrapper
