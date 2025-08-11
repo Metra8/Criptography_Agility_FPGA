@@ -65,65 +65,60 @@ begin
 
     -- Estímulos
     stim_proc: process
-        variable input_count : integer := 0;
+        variable old_output  : std_logic_vector(127 downto 0);
+        variable new_output  : std_logic_vector(127 downto 0);
     begin
         wait for 20 ns;
         reset <= '0';
 
-        -- aes
-        for i in 0 to 3 loop
-            wait for 10 ns;
-            data_in <= std_logic_vector(to_unsigned(i, 128));
-            key     <= x"2b7e151628aed2a6abf7158809cf4f3c";
-            enable  <= '1';
-            wait for clk_period;
-            enable  <= '0';
-            wait until ready = '1';
-            report "AES#" & integer'image(i) & " => " & to_hstring(data_out);
-        end loop;
+        -- first key with aes cypher
+        data_in <= x"00000000000000000000000000000001";
+        key     <= x"2b7e151628aed2a6abf7158809cf4f3c";
+        enable  <= '1';
+        wait until ready = '1';
+        old_output := data_out;
+        report "AES inicial => " & to_hstring(data_out);
 
-        -- Fuerza cambio
-        wait for 50 ns;
+        -- forced change
         suspicious <= '1';
         wait for clk_period;
         suspicious <= '0';
 
-        -- Ejecuta una entrada con Kyber
-        data_in <= x"99999999999999999999999999999999";
-        key     <= x"00112233445566778899aabbccddeeff";
-        enable  <= '1';
-        wait for clk_period;
-        enable  <= '0';
+        -- regenerate key with kyber
+        data_in <= x"00009320009999900007320003333001";
         wait until ready = '1';
-        report "Kyber (por suspicious) => " & to_hstring(data_out);
+        new_output := data_out;
+        report "AES tras Kyber(suspicious) => " & to_hstring(data_out);
 
-        -- Vuelve a AES automáticamente tras 200 bloques
-        -- Forzamos contador alto
+
+        old_output := new_output; -- guardamos para siguiente prueba
+
+        -- vuelve a AES automáticamente tras 200 bloques
         for i in 0 to 200 loop
-            wait for 10 ns;
             data_in <= std_logic_vector(to_unsigned(i, 128));
-            enable  <= '1';
-            wait for clk_period;
-            enable  <= '0';
             wait until ready = '1';
+            wait for clk_period;
         end loop;
 
-        wait for 50 ns;
-        report "Debería haber vuelto a AES";
+        data_in <= x"00000000000000000000000000000001";
+        wait until ready = '1';
+        new_output := data_out;
+        report "AES tras rotación automática => " & to_hstring(data_out);
 
-        -- Cambia con rand_toggle
+        old_output := new_output;
+
+
+        -- cambia con rand_toggle
         rand_toggle <= '1';
         wait for clk_period;
         rand_toggle <= '0';
 
-        data_in <= x"AABBCCDDEEFF00112233445566778899";
-        enable  <= '1';
-        wait for clk_period;
-        enable  <= '0';
+        data_in <= x"00000000000000000000000000000001";
         wait until ready = '1';
-        report "Salida tras rand_toggle => " & to_hstring(data_out);
+        new_output := data_out;
+        report "AES tras rand_toggle => " & to_hstring(data_out);
 
-        wait for 100 ns;
+        wait for 50 ns;
         assert false report "Simulación terminada correctamente." severity failure;
     end process;
 
