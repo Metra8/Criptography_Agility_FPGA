@@ -33,9 +33,11 @@ Step 4: Constrain the design
 Step 5: Generate bitstream.
 
 
-CONTACT & ATTRIBUTION
+Contact & attribution
 ---------------------
 
 Project Lead: Antonio Blasco Valenti
+
 Collaborators: Álvaro Masa Fernandez
-Email: blascovalenti@gmail.com
+
+Contact information: blascovalenti@gmail.com
