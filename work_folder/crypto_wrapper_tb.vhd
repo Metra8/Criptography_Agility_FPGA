@@ -93,12 +93,13 @@ begin
 
         old_output := new_output; -- guardamos para siguiente prueba
 
+        -- intensive task**
         -- vuelve a AES automáticamente tras 200 bloques
-        for i in 0 to 200 loop
-            data_in <= std_logic_vector(to_unsigned(i, 128));
-            wait until ready = '1';
-            wait for clk_period;
-        end loop;
+        --for i in 0 to 200 loop
+            --data_in <= std_logic_vector(to_unsigned(i, 128));
+            --wait until ready = '1';
+            --wait for clk_period;
+        --end loop;
 
         data_in <= x"00000000000000000000000000000001";
         wait until ready = '1';
@@ -113,7 +114,7 @@ begin
         wait for clk_period;
         rand_toggle <= '0';
 
-        data_in <= x"00000000000000000000000000000001";
+        data_in <= x"00012300000000000000000000000001";
         wait until ready = '1';
         new_output := data_out;
         report "AES tras rand_toggle => " & to_hstring(data_out);

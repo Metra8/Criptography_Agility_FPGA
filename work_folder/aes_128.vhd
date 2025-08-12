@@ -137,6 +137,7 @@ begin
                         data_out <= state_reg;
                         ready <= '1';
                         state <= IDLE;
+                        ready <= '0';
                         
                     when others =>
                         state <= IDLE;
