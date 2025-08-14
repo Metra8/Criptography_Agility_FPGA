@@ -6,153 +6,211 @@ entity crypto_wrapper is
     port(
         clk            : in  std_logic;
         reset          : in  std_logic;
-        
-        -- Interfaz serie para datos (32 bits por transferencia)
-        data_in        : in  std_logic_vector(31 downto 0);
-        data_valid     : in  std_logic;
-        data_ready     : out std_logic;
-        
-        -- Interfaz serie para clave (32 bits por transferencia)  
-        key_in         : in  std_logic_vector(31 downto 0);
-        key_valid      : in  std_logic;
-        key_ready      : out std_logic;
-        
-        -- Salida serie (32 bits por transferencia)
-        data_out       : out std_logic_vector(31 downto 0);
-        output_valid   : out std_logic;
-        output_ready   : in  std_logic;
-        
-        -- Señales de control
         enable         : in  std_logic;
+        key            : in  std_logic_vector(127 downto 0);
+        data_in        : in  std_logic_vector(127 downto 0);
         suspicious     : in  std_logic;
         force_switch   : in  std_logic;
         rand_toggle    : in  std_logic;
-        
-        -- Estado
-        ready          : out std_logic;
-        busy           : out std_logic
+        data_out       : out std_logic_vector(127 downto 0);
+        ready          : out std_logic
     );
 end crypto_wrapper;
 
 architecture behavioral of crypto_wrapper is
 
-    -- Registros internos completos
-    signal data_reg     : std_logic_vector(127 downto 0);
-    signal key_reg      : std_logic_vector(127 downto 0);
-    signal output_reg   : std_logic_vector(127 downto 0);
+
+    type k_state_t is (K_IDLE, K_START_KP, K_WAIT_KP, K_SEND_SS, K_WAIT_ENC, K_WAIT_DEC, K_UPDATE_KEY);
+    signal k_state : k_state_t := K_IDLE;   
+
+
+    --aes
+    signal aes_data_out    : std_logic_vector(127 downto 0);
+    signal aes_ready       : std_logic;
+    signal aes_key_reg : std_logic_vector(127 downto 0);
+
+
+    -- Kyber Keypair
+    signal kyber_pk_keypair    : unsigned(127 downto 0);
+    signal kyber_sk_keypair    : unsigned(127 downto 0);
+    signal kyber_valid_keypair : std_logic;
+    signal kyber_start_keypair : std_logic;
     
-    -- Contadores para transferencia serie
-    signal data_count   : integer range 0 to 3 := 0;
-    signal key_count    : integer range 0 to 3 := 0;
-    signal output_count : integer range 0 to 3 := 0;
     
-    -- Estados del protocolo serie
-    type serial_state_t is (IDLE, LOADING_DATA, LOADING_KEY, PROCESSING, SENDING_OUTPUT);
-    signal state : serial_state_t := IDLE;
+    -- Kyber Enc
+    signal kyber_ss_enc        : unsigned(127 downto 0);
+    signal kyber_ct_enc        : unsigned(127 downto 0);
+    signal kyber_valid_enc     : std_logic;
     
-    -- Instancia del crypto_wrapper original (renombrado para evitar conflicto)
-    signal crypto_enable    : std_logic;
-    signal crypto_data_out  : std_logic_vector(127 downto 0);
-    signal crypto_ready     : std_logic;
+    
+    
+    -- Kyber Dec
+    signal kyber_ss_dec        : unsigned(127 downto 0);
+    signal kyber_ct_dec        : unsigned(127 downto 0);
+    signal kyber_valid_dec     : std_logic;
+
+
+    --common
+    signal current_cipher  : std_logic := '0'; -- '0': AES, '1': Kyber
+    signal block_count     : integer := 0;
+
+    constant aes           : std_logic := '0';
+    constant kyber         : std_logic := '1';
 
 begin
 
-    -- Lógica de control serie
-    process(clk, reset)
+
+    ---------------------------------------------------------------------------
+
+    -- instancia AES-128
+    aes_inst : entity work.aes_128
+        port map (
+            clk      => clk,
+            reset    => reset,
+            enable   => enable,
+            key      => key,
+            data_in  => data_in,
+            data_out => aes_data_out,
+            ready    => aes_ready
+        );
+
+    -- instancias Kyber-512--
+    --keypair
+    kyber_keypair_inst : entity work.kyber_512_keypair
+    generic map (
+        PK_BITS => 128,
+        SK_BITS => 128
+    )
+
+    port map (
+        clk   => clk,
+        reset => reset,
+        start => kyber_start_keypair,
+        pk    => kyber_pk_keypair,
+        sk    => kyber_sk_keypair,
+        valid => kyber_valid_keypair
+    );
+
+    --encoder
+    kyber_enc_inst : entity work.kyber_512_enc
+    generic map (
+        SS_BITS => 128,
+        PK_BITS => 128,
+        CT_BITS => 128
+    )
+    port map (
+        clk   => clk,
+        reset => reset,
+        ss    => kyber_ss_enc,
+        pk    => kyber_pk_keypair,
+        valid => kyber_valid_enc,
+        ct    => kyber_ct_enc
+    );
+
+    --decoder
+    kyber_dec_inst : entity work.kyber_512_dec
+    generic map (
+        CT_BITS => 128,
+        SK_BITS => 128,
+        SS_BITS => 128
+    )
+    port map (
+        clk   => clk,
+        reset => reset,
+        ct    => kyber_ct_dec,
+        sk    => kyber_sk_keypair,
+        valid => kyber_valid_dec,
+        ss    => kyber_ss_dec
+    );
+
+
+    --kyber_ct_enc <= (others => '0');
+    --kyber_ct_dec <= kyber_ct_enc;
+    --kyber_ss_enc <= (others => '0');
+
+
+
+
+    ---------------------------------------------------------------------------
+
+        -- Multiplexor de salida según cifrado
+    data_out <= aes_data_out when current_cipher = aes else std_logic_vector(kyber_ss_enc);
+    ready    <= aes_ready    when current_cipher = aes else kyber_valid_enc;
+
+    -- Lógica de selección dinámica de cifrado
+
+    -- Reglas de cambio de algoritmo:
+    -- 1. cambiar a Kyber si force_switch='1', suspicious='1' o block_count >= 1000.
+    -- 2. cambio aleatorio si rand_toggle='1'.
+    -- 3. volver a AES si usando Kyber y block_count >= 200.
+    -- AES es el algoritmo por defecto tras reset.
+
+
+    process(clk, reset, key)
     begin
         if reset = '1' then
-            data_reg <= (others => '0');
-            key_reg <= (others => '0');
-            output_reg <= (others => '0');
-            data_count <= 0;
-            key_count <= 0;
-            output_count <= 0;
-            state <= IDLE;
-            crypto_enable <= '0';
-            
+            kyber_start_keypair <= '0';
+            kyber_ss_enc        <= (others => '0');
+            aes_key_reg         <= key;   -- seed AES key from external port on reset
+            block_count         <= 0;
+            k_state             <= K_IDLE;
+            current_cipher      <= aes;
         elsif rising_edge(clk) then
-            -- Defaults
-            crypto_enable <= '0';
-            data_ready <= '0';
-            key_ready <= '0';
-            output_valid <= '0';
-            ready <= '0';
-            busy <= '1';
-            
-            case state is
-                when IDLE =>
-                    ready <= '1';
-                    busy <= '0';
+            -- default: deassert one-cycle pulses / keep previous values where appropriate
+            kyber_start_keypair <= '0';
+
+            -- increment block counter when AES produced a block and we are idle (not renegotiating)
+            if (aes_ready = '1') and (k_state = K_IDLE) then
+                block_count <= block_count + 1;
+            end if;
+
+            -- FSM transitions and actions
+            case k_state is
+                when K_IDLE =>
+                    current_cipher <= aes;
                     if enable = '1' then
-                        state <= LOADING_KEY;
-                        key_count <= 0;
-                    end if;
-                    
-                when LOADING_KEY =>
-                    key_ready <= '1';
-                    if key_valid = '1' then
-                        -- Cargar 32 bits de la clave
-                        case key_count is
-                            when 0 => key_reg(31 downto 0) <= key_in;
-                            when 1 => key_reg(63 downto 32) <= key_in;
-                            when 2 => key_reg(95 downto 64) <= key_in;
-                            when 3 => key_reg(127 downto 96) <= key_in;
-                        end case;
-                        
-                        if key_count = 3 then
-                            state <= LOADING_DATA;
-                            data_count <= 0;
-                        else
-                            key_count <= key_count + 1;
+                        if (force_switch = '1') or (suspicious = '1') or (block_count >= 1000) or (rand_toggle = '1') then
+                            -- start the keypair generation (pulse start)
+                            kyber_start_keypair <= '1';
+                            k_state <= K_WAIT_KP;
                         end if;
                     end if;
-                    
-                when LOADING_DATA =>
-                    data_ready <= '1';
-                    if data_valid = '1' then
-                        -- Cargar 32 bits de datos
-                        case data_count is
-                            when 0 => data_reg(31 downto 0) <= data_in;
-                            when 1 => data_reg(63 downto 32) <= data_in;
-                            when 2 => data_reg(95 downto 64) <= data_in;
-                            when 3 => data_reg(127 downto 96) <= data_in;
-                        end case;
-                        
-                        if data_count = 3 then
-                            state <= PROCESSING;
-                            crypto_enable <= '1';
-                        else
-                            data_count <= data_count + 1;
-                        end if;
+
+                when K_WAIT_KP =>
+                    -- waiting for keypair generator to assert valid
+                    current_cipher <= kyber;
+                    if kyber_valid_keypair = '1' then
+                        -- provide SS to encoder: here we choose data_in as SS for the stub
+                        -- (in real implementation use RNG/KDF)
+                        kyber_ss_enc <= unsigned(data_in);
+                        k_state <= K_WAIT_ENC;
                     end if;
-                    
-                when PROCESSING =>
-                    if crypto_ready = '1' then
-                        output_reg <= crypto_data_out;
-                        output_count <= 0;
-                        state <= SENDING_OUTPUT;
+
+                when K_WAIT_ENC =>
+                    current_cipher <= kyber;
+                    -- wait for encoder to assert valid and produce ct
+                    if kyber_valid_enc = '1' then
+                        -- ciphertext forwarded concurrently to decoder
+                        k_state <= K_WAIT_DEC;
                     end if;
-                    
-                when SENDING_OUTPUT =>
-                    output_valid <= '1';
-                    if output_ready = '1' then
-                        -- Enviar 32 bits de salida
-                        case output_count is
-                            when 0 => data_out <= output_reg(31 downto 0);
-                            when 1 => data_out <= output_reg(63 downto 32);
-                            when 2 => data_out <= output_reg(95 downto 64);
-                            when 3 => data_out <= output_reg(127 downto 96);
-                        end case;
-                        
-                        if output_count = 3 then
-                            state <= IDLE;
-                        else
-                            output_count <= output_count + 1;
-                        end if;
+
+                when K_WAIT_DEC =>
+                    current_cipher <= kyber;
+                    if kyber_valid_dec = '1' then
+                        k_state <= K_UPDATE_KEY;
                     end if;
-                    
+
+                when K_UPDATE_KEY =>
+                    -- update AES key from kyber_ss_dec (lower 128 bits)
+                    aes_key_reg <= std_logic_vector(kyber_ss_dec(127 downto 0));
+                    block_count <= 0;  -- reset usage counter after key rotation
+                    k_state <= K_IDLE;
+
+                when others =>
+                    k_state <= K_IDLE;
             end case;
         end if;
     end process;
+
 
 end behavioral;
