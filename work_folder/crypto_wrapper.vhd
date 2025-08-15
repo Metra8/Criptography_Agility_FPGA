@@ -4,23 +4,41 @@ use IEEE.numeric_std.all;
 
 entity crypto_wrapper is
     port(
-        clk           : in  std_logic;
-        reset         : in  std_logic;
+        --------------------------------------------------------------------
+        -- Señales de sistema
+        --------------------------------------------------------------------
+        clk                : in  std_logic;
+        reset              : in  std_logic;
 
-        -- Interfaz externa de 32 bits
-        ext_data_in   : in  std_logic_vector(31 downto 0);
-        ext_valid_in  : in  std_logic;
-        ext_ready_out : out std_logic;
-        ext_data_out  : out std_logic_vector(31 downto 0);
-        ext_valid_out : out std_logic;
-        ext_ready_in  : in  std_logic;
+        --------------------------------------------------------------------
+        -- Interfaz externa de datos (32 bits)
+        --------------------------------------------------------------------
+        ext_data_in        : in  std_logic_vector(31 downto 0);
+        ext_valid_in       : in  std_logic;
+        ext_ready_out      : out std_logic;
+        ext_data_out       : out std_logic_vector(31 downto 0);
+        ext_valid_out      : out std_logic;
+        ext_ready_in       : in  std_logic;
 
-        -- Señales de control
-        suspicious    : in  std_logic;
-        force_switch  : in  std_logic;
-        rand_toggle   : in  std_logic
+        --------------------------------------------------------------------
+        -- Interfaz externa de clave (32 bits)
+        --------------------------------------------------------------------
+        ext_key_in         : in  std_logic_vector(31 downto 0);
+        ext_key_valid      : in  std_logic;
+        ext_key_ready      : out std_logic;
+        ext_key_out        : out std_logic_vector(31 downto 0);
+        ext_key_valid_out  : out std_logic;
+        ext_key_ready_in   : in  std_logic;
+
+        --------------------------------------------------------------------
+        -- Señales de control de cripto-agilidad
+        --------------------------------------------------------------------
+        suspicious         : in  std_logic;
+        force_switch       : in  std_logic;
+        rand_toggle        : in  std_logic
     );
 end crypto_wrapper;
+
 
 architecture behavioral of crypto_wrapper is
 
@@ -68,6 +86,17 @@ architecture behavioral of crypto_wrapper is
     constant aes   : std_logic := '0';
     constant kyber : std_logic := '1';
 
+    --------------------------------------------------------------------
+    -- Señales internas entre bus_adapter y core AES/Kyber (KEY 128 bits)
+    --------------------------------------------------------------------
+    signal core_key_in        : std_logic_vector(127 downto 0);
+    signal core_key_out       : std_logic_vector(127 downto 0);
+    signal core_key_valid_in  : std_logic;
+    signal core_key_ready_out : std_logic;
+    signal core_key_valid_out : std_logic;
+    signal core_key_ready_in  : std_logic;
+
+
 begin
 
     --------------------------------------------------------------------
@@ -77,21 +106,40 @@ begin
         port map (
             clk           => clk,
             reset         => reset,
-            -- Interfaz externa
+
+            -- Interfaz externa DATA
             ext_data_in   => ext_data_in,
             ext_valid_in  => ext_valid_in,
             ext_ready_out => ext_ready_out,
             ext_data_out  => ext_data_out,
             ext_valid_out => ext_valid_out,
             ext_ready_in  => ext_ready_in,
-            -- Interfaz interna
+
+            -- Interfaz externa KEY
+            ext_key_in    => ext_key_in,
+            ext_key_valid => ext_key_valid,
+            ext_key_ready => ext_key_ready,
+            ext_key_out   => ext_key_out,
+            ext_key_valid_out => ext_key_valid_out,
+            ext_key_ready_in  => ext_key_ready_in,
+
+            -- Interfaz interna DATA (hacia el core AES/Kyber)
             int_data_in   => core_data_out,
             int_valid_in  => core_valid_out,
             int_ready_out => core_ready_in,
             int_data_out  => core_data_in,
             int_valid_out => core_valid_in,
-            int_ready_in  => core_ready_out
+            int_ready_in  => core_ready_out,
+
+            -- Interfaz interna KEY (hacia el core AES/Kyber)
+            int_key_in        => core_key_out,
+            int_key_valid     => core_key_valid_out,
+            int_key_ready     => core_key_ready_in,
+            int_key_out       => core_key_in,
+            int_key_valid_out => core_key_valid_in,
+            int_key_ready_in  => core_key_ready_out
         );
+
 
     --------------------------------------------------------------------
     -- Instancia AES-128
@@ -160,6 +208,7 @@ begin
             ss    => kyber_ss_dec
         );
 
+    
     --------------------------------------------------------------------
     -- Multiplexor de salida hacia el bus_adapter
     --------------------------------------------------------------------
