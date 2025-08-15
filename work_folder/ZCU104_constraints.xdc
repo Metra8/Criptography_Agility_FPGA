@@ -19,16 +19,16 @@ set_false_path -from [get_ports reset]
 #Other net   PACKAGE_PIN U18      - SYSMON_AGND               Bank   0 - VREFP
 set_property PACKAGE_PIN B21      [get_ports "data_in[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_L24N_T3U_N11_28
 set_property IOSTANDARD  LVCMOS18 [get_ports "data_in[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_L24N_T3U_N11_28
-#set_property PACKAGE_PIN B20      [get_ports "data_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L24P_T3U_N10_28
-#set_property IOSTANDARD  LVCMOS18 [get_ports "data_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L24P_T3U_N10_28
-#set_property PACKAGE_PIN A23      [get_ports "data_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L23N_T3U_N9_28
-#set_property IOSTANDARD  LVCMOS18 [get_ports "data_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L23N_T3U_N9_28
-set_property PACKAGE_PIN A22      [get_ports "key[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_L23P_T3U_N8_28
-set_property IOSTANDARD  LVCMOS18 [get_ports "key[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_L23P_T3U_N8_28
-#set_property PACKAGE_PIN B19      [get_ports "key_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L22N_T3U_N7_DBC_AD0N_28
-#set_property IOSTANDARD  LVCMOS18 [get_ports "key_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L22N_T3U_N7_DBC_AD0N_28
-#set_property PACKAGE_PIN B18      [get_ports "key_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L22P_T3U_N6_DBC_AD0P_28
-#set_property IOSTANDARD  LVCMOS18 [get_ports "key_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L22P_T3U_N6_DBC_AD0P_28
+set_property PACKAGE_PIN B20      [get_ports "key_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L24P_T3U_N10_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "key_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L24P_T3U_N10_28
+set_property PACKAGE_PIN A23      [get_ports "data_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L23N_T3U_N9_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "data_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_L23N_T3U_N9_28
+#set_property PACKAGE_PIN A22      [get_ports "key[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_L23P_T3U_N8_28
+#set_property IOSTANDARD  LVCMOS18 [get_ports "key[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_L23P_T3U_N8_28
+set_property PACKAGE_PIN B19      [get_ports "data_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L22N_T3U_N7_DBC_AD0N_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "data_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L22N_T3U_N7_DBC_AD0N_28
+set_property PACKAGE_PIN B18      [get_ports "key_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L22P_T3U_N6_DBC_AD0P_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "key_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L22P_T3U_N6_DBC_AD0P_28
 #set_property PACKAGE_PIN A21      [get_ports "5N7709"] ;# Bank  28 VCCO - VCC1V8   - IO_L21N_T3L_N5_AD8N_28
 #set_property IOSTANDARD  LVCMOSxx [get_ports "5N7709"] ;# Bank  28 VCCO - VCC1V8   - IO_L21N_T3L_N5_AD8N_28
 #set_property PACKAGE_PIN A20      [get_ports "UART2_TXD_FPGA_RXD"] ;# Bank  28 VCCO - VCC1V8   - IO_L21P_T3L_N4_AD8P_28
@@ -43,10 +43,10 @@ set_property IOSTANDARD  LVCMOS18 [get_ports "key[0]"] ;# Bank  28 VCCO - VCC1V8
 #set_property IOSTANDARD  LVCMOSxx [get_ports "5N7704"] ;# Bank  28 VCCO - VCC1V8   - IO_L19P_T3L_N0_DBC_AD9P_28
 set_property PACKAGE_PIN B23      [get_ports "data_out[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_T3U_N12_28
 set_property IOSTANDARD  LVCMOS18 [get_ports "data_out[0]"] ;# Bank  28 VCCO - VCC1V8   - IO_T3U_N12_28
-#set_property PACKAGE_PIN F25      [get_ports "output_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_T2U_N12_28
-#set_property IOSTANDARD  LVCMOS18 [get_ports "output_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_T2U_N12_28
-#set_property PACKAGE_PIN G26      [get_ports "ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L18N_T2U_N11_AD2N_28
-#set_property IOSTANDARD  LVCMOS18 [get_ports "ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L18N_T2U_N11_AD2N_28
+set_property PACKAGE_PIN F25      [get_ports "data_out_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_T2U_N12_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "data_out_valid"] ;# Bank  28 VCCO - VCC1V8   - IO_T2U_N12_28
+set_property PACKAGE_PIN G26      [get_ports "data_out_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L18N_T2U_N11_AD2N_28
+set_property IOSTANDARD  LVCMOS18 [get_ports "data_out_ready"] ;# Bank  28 VCCO - VCC1V8   - IO_L18N_T2U_N11_AD2N_28
 set_property PACKAGE_PIN G25      [get_ports "enable"] ;# Bank  28 VCCO - VCC1V8   - IO_L18P_T2U_N10_AD2P_28
 set_property IOSTANDARD  LVCMOS18 [get_ports "enable"] ;# Bank  28 VCCO - VCC1V8   - IO_L18P_T2U_N10_AD2P_28
 set_property PACKAGE_PIN C23      [get_ports "suspicious"] ;# Bank  28 VCCO - VCC1V8   - IO_L17N_T2U_N9_AD10N_28
@@ -245,8 +245,8 @@ set_property IOSTANDARD  LVDS     [get_ports "clk"] ;# Bank  68 VCCO - VADJ_FMC 
 #set_property IOSTANDARD  LVDS     [get_ports "FMC_LPC_LA05_P"] ;# Bank  67 VCCO - VADJ_FMC - IO_L21P_T3L_N4_AD8P_67
 #set_property PACKAGE_PIN J15      [get_ports "FMC_LPC_LA07_N"] ;# Bank  67 VCCO - VADJ_FMC - IO_L20N_T3L_N3_AD1N_67
 #set_property IOSTANDARD  LVDS     [get_ports "FMC_LPC_LA07_N"] ;# Bank  67 VCCO - VADJ_FMC - IO_L20N_T3L_N3_AD1N_67
-#set_property PACKAGE_PIN J16      [get_ports "FMC_LPC_LA07_P"] ;# Bank  67 VCCO - VADJ_FMC - IO_L20P_T3L_N2_AD1P_67
-#set_property IOSTANDARD  LVDS     [get_ports "FMC_LPC_LA07_P"] ;# Bank  67 VCCO - VADJ_FMC - IO_L20P_T3L_N2_AD1P_67
+#set_property PACKAGE_PIN J16      [get_ports "key[0]"] ;# Bank  67 VCCO - VADJ_FMC - IO_L20P_T3L_N2_AD1P_67
+#set_property IOSTANDARD  LVDS     [get_ports "key[0]"] ;# Bank  67 VCCO - VADJ_FMC - IO_L20P_T3L_N2_AD1P_67
 #set_property PACKAGE_PIN K20      [get_ports "FMC_LPC_LA02_N"] ;# Bank  67 VCCO - VADJ_FMC - IO_L19N_T3L_N1_DBC_AD9N_67
 #set_property IOSTANDARD  LVDS     [get_ports "FMC_LPC_LA02_N"] ;# Bank  67 VCCO - VADJ_FMC - IO_L19N_T3L_N1_DBC_AD9N_67
 #set_property PACKAGE_PIN L20      [get_ports "FMC_LPC_LA02_P"] ;# Bank  67 VCCO - VADJ_FMC - IO_L19P_T3L_N0_DBC_AD9P_67
@@ -537,8 +537,8 @@ set_property IOSTANDARD  LVDS     [get_ports "clk"] ;# Bank  68 VCCO - VADJ_FMC 
 #set_property IOSTANDARD  POD12    [get_ports "DDR4_SODIMM_DQ30"] ;# Bank  65 VCCO - VCC1V2   - IO_L2N_T0L_N3_65
 #set_property PACKAGE_PIN AM19     [get_ports "DDR4_SODIMM_DQ31"] ;# Bank  65 VCCO - VCC1V2   - IO_L2P_T0L_N2_65
 #set_property IOSTANDARD  POD12    [get_ports "DDR4_SODIMM_DQ31"] ;# Bank  65 VCCO - VCC1V2   - IO_L2P_T0L_N2_65
-##set_property PACKAGE_PIN AP20     [get_ports "6N12401"] ;# Bank  65 VCCO - VCC1V2   - IO_L1N_T0L_N1_DBC_65
-##set_property IOSTANDARD  LVCMOSxx [get_ports "6N12401"] ;# Bank  65 VCCO - VCC1V2   - IO_L1N_T0L_N1_DBC_65
+set_property PACKAGE_PIN AP20     [get_ports "key[0]"] ;# Bank  65 VCCO - VCC1V2   - IO_L1N_T0L_N1_DBC_65
+set_property IOSTANDARD  LVCMOS18 [get_ports "key[0]"] ;# Bank  65 VCCO - VCC1V2   - IO_L1N_T0L_N1_DBC_65
 #set_property PACKAGE_PIN AP19     [get_ports "DDR4_SODIMM_DM3_B"] ;# Bank  65 VCCO - VCC1V2   - IO_L1P_T0L_N0_DBC_65
 #set_property IOSTANDARD  POD12    [get_ports "DDR4_SODIMM_DM3_B"] ;# Bank  65 VCCO - VCC1V2   - IO_L1P_T0L_N0_DBC_65
 ##Other net   PACKAGE_PIN AB20     - 6N11582                   Bank  65 - VREF_65
