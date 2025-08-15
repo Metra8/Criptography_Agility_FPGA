@@ -10,6 +10,7 @@ SOURCES = \
     kyber_512_keypair.vhd \
     kyber_512_dec.vhd \
     kyber_512_enc.vhd \
+    bus_adapter.vhd \
     crypto_wrapper.vhd
 
 TOP = crypto_wrapper
