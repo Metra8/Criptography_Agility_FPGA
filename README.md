@@ -52,7 +52,7 @@ Step 2: Import the vhdl files. This includes:
     
 Step 3: Select VHDL 2008 as the programming language.
 
-Step 4: Constrain the design.
+Step 4: Constrain the design. Select the xczu7ev-ffvc1156-2-e as your proyect part.
 
 Step 5: Generate bitstream.
 
