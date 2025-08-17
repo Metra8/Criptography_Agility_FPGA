@@ -4,7 +4,6 @@ use IEEE.numeric_std.all;
 use work.aes_transform_pkg.all;
 use work.sbox_pkg.all;
 use work.key_expansion_pkg.all;
-use work.to_hexadecimal_pkg.all;
 
 entity aes_128_tb is
 
