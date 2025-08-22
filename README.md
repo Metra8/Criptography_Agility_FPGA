@@ -8,6 +8,8 @@ Switching conditions are to be simulated, but ideally would be implemented in a 
 
 **Note**: Due to the significant complexity of implementing Kyber-512 in hardware—particularly its polynomial arithmetic, noise sampling, and reconciliation mechanisms—the current version includes **Kyber as a behavioral stub**. This stub emulates Kyber’s interface (ports, timing, and control signals) to support full system testing and integration with the crypto-agility FSM. This decision preserves the project’s architectural integrity while focusing development effort on the crypto-agility mechanism.
 
+This proyect is presented for the 2025 AMD Open Hardware Competition on the adapting computing category under the team number AOHW25_494.
+
 
 ## Project features
 
